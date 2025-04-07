@@ -1,18 +1,31 @@
+import os
 from flask import Flask, request, jsonify
 from transformers import pipeline
 
 app = Flask(__name__)
-model = pipeline("zero-shot-classification",
+
+model = None 
+cache_dir = "/root/.cache/huggingface"  
+model_path = os.path.join(cache_dir, "hub", "models--facebook--bart-large-mnli")
+
+def get_model():
+    global model
+    if model is None:
+       if os.path.exists(model_path):
+            print("Loading mood tracking model from cache...")
+            model = pipeline(
+                 "zero-shot-classification",
                   model="facebook/bart-large-mnli")
-
-
+            print("mood tracking model loaded successfully!")
+       else: 
+           print("Model not found! Please download it first.")
+    return model
 
 
 @app.route('/health', methods=['GET'])
 def health():
     """Endpoint to check if the service is running."""
     return jsonify({"status": "Healthy"}), 200
-
 
 @app.route('/sentiment', methods=['POST'])
 def sentiment():
@@ -24,9 +37,8 @@ def sentiment():
     
     text = data['text']
     
-    candidate_labels = ["positive", "negative", "neutral"]
-    
-    # Classify text
+    candidate_labels = ["Postive", "Negative","Neutral"]
+  
     model = get_model()
     if(model is not None):
          results = model(text, candidate_labels,multi_label=True)
