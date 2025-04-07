@@ -1,3 +1,4 @@
+# app.py
 import os
 from flask import Flask, request, jsonify
 from transformers import pipeline
@@ -37,8 +38,9 @@ def sentiment():
     
     text = data['text']
     
-    candidate_labels = ["Postive", "Negative","Neutral"]
-  
+
+    candidate_labels = ["Happy", "Sad", "Excited", "Worried", "Hateful", "Violent"]
+    
     model = get_model()
     if(model is not None):
          results = model(text, candidate_labels,multi_label=True)
